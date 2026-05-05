@@ -77,7 +77,9 @@ void processButtonPin() {
 
   if (newButtonState != buttonState && currentTime - lastEventTime > DEBOUNCE_DELAY) {
     if (!isPressed && newButtonState == LOW) {
-      currentPattern = (currentPattern % 5) + 1;
+      currentPattern = (currentPattern + 1) % 5;
+      Serial.print("New pattern: ");
+      Serial.println(currentPattern + 1);
     }
     isPressed = !isPressed;
     lastEventTime = currentTime;

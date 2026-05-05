@@ -1,114 +1,70 @@
 #define BUTTON_PIN 3
+#define DEBOUNCE_DELAY 500                // in microseconds
+#define PATTERN_STATE_DURATION 500        // duration of each state in a pattern in milliseconds
 
-#define DEBOUNCE_DELAY 500 // in microseconds
-
-#define PATTERN_CYCLE_TIME 1000           // duration of one sicle in milliseconds
-
-short currentPattern = 1;                 // which pattern is currently being played (1-5)
-unsigned long lastPatternStateSwitch = 0; // each pattern alternates between states. Time of the last switch within a pattern in milliseconds
+short currentPattern = 0;                 // which pattern is currently being played (1-5)
 int ledPins[4] = {8, 9, 10, 11};
 
+// [pattern][patternState][ledPin]
+int patterns[5][4][4] = {
+  // pattern 1
+  {
+    {HIGH, HIGH, HIGH, HIGH},
+    {LOW, LOW, LOW, LOW},
+    {HIGH, HIGH, HIGH, HIGH},
+    {LOW, LOW, LOW, LOW}
+  },
+  // pattern 2
+  {
+    {HIGH, LOW, HIGH, LOW},
+    {LOW, HIGH, LOW, HIGH},
+    {HIGH, LOW, HIGH, LOW},
+    {LOW, HIGH, LOW, HIGH}
+  },
+  // pattern 3
+  {
+    {HIGH, LOW, LOW, LOW},
+    {LOW, HIGH, LOW, LOW},
+    {LOW, LOW, HIGH, LOW},
+    {LOW, LOW, LOW, HIGH}
+  },
+  // pattern 4
+  {
+    {HIGH, HIGH, LOW, LOW},
+    {LOW, LOW, HIGH, HIGH},
+    {HIGH, HIGH, LOW, LOW},
+    {LOW, LOW, HIGH, HIGH}
+  },
+  // pattern 5
+  {
+    {LOW, HIGH, HIGH, LOW},
+    {HIGH, LOW, LOW, HIGH},
+    {LOW, HIGH, HIGH, LOW},
+    {HIGH, LOW, LOW ,HIGH}
+  }
+};
+
+
 void setup() {
-  pinMode(ledPins[0], OUTPUT);
-  pinMode(ledPins[1], OUTPUT);
-  pinMode(ledPins[2], OUTPUT);
-  pinMode(ledPins[3], OUTPUT);
+  for (int i = 0; i < 4; ++i) {
+    pinMode(ledPins[i], OUTPUT);
+  }
   pinMode(BUTTON_PIN, INPUT_PULLUP);
 
-  digitalWrite(ledPins[0], LOW);
-  digitalWrite(ledPins[1], LOW);
-  digitalWrite(ledPins[2], LOW);
-  digitalWrite(ledPins[3], LOW);
+  for (int i = 0; i < 4; ++i) {
+    digitalWrite(ledPins[i], LOW);
+  }
 
   Serial.begin(9600);
 }
 
-void patternOne() {
-  Serial.println("pattern1");
-
-  static short outputValue = HIGH;  // alternates between LOW and HIGH
-
-  digitalWrite(ledPins[0], outputValue);
-  digitalWrite(ledPins[1], outputValue);
-  digitalWrite(ledPins[2], outputValue);
-  digitalWrite(ledPins[3], outputValue);
-
-  outputValue = !outputValue;
-}
-
-void patternTwo() {
-  Serial.println("pattern2");
-
-  static short outputValue = HIGH;  // alternates between LOW and HIGH
-
-  digitalWrite(ledPins[0], outputValue);
-  digitalWrite(ledPins[1], !outputValue);
-  digitalWrite(ledPins[2], outputValue);
-  digitalWrite(ledPins[3], !outputValue);
-
-  outputValue = !outputValue;
-}
-
-void patternThree() {
-  Serial.println("pattern3");
-
-  static short patternState = 0;  // alternates between 0 - 3
-  digitalWrite(ledPins[0], LOW);
-  digitalWrite(ledPins[1], LOW);
-  digitalWrite(ledPins[2], LOW);
-  digitalWrite(ledPins[3], LOW);
-
-  digitalWrite(ledPins[patternState], HIGH);
-
-  patternState = (patternState + 1) % 4;
-}
-
-void patternFour() {
-  Serial.println("pattern4");
-
-  static short outputValue = HIGH; // alternates between HIGH and LOW
-                                   //
-  digitalWrite(ledPins[0], outputValue);
-  digitalWrite(ledPins[1], outputValue);
-  digitalWrite(ledPins[2], !outputValue);
-  digitalWrite(ledPins[3], !outputValue);
-
-  outputValue = !outputValue;
-}
-
-void patternFive() {
-  Serial.println("pattern5");
-
-  static short outputValue = HIGH; // alternates between HIGH and LOW
-                                   //
-  digitalWrite(ledPins[0], !outputValue);
-  digitalWrite(ledPins[1], outputValue);
-  digitalWrite(ledPins[2], outputValue);
-  digitalWrite(ledPins[3], !outputValue);
-
-  outputValue = !outputValue;
-}
 
 void updatePattern() {
-  switch (currentPattern) {
-    case 1:
-      patternOne();
-      break;
-    case 2:
-      patternTwo();
-      break;
-    case 3:
-      patternThree();
-      break;
-    case 4:
-      patternFour();
-      break;
-    case 5:
-      patternFive();
-      break;
-    default:
-      break;
+  static short patternState = 0;
+  for(int i = 0; i < 4; ++i) {
+    digitalWrite(ledPins[i], patterns[currentPattern][patternState][i]);
   }
+  patternState = (patternState + 1) % 4;
 }
 
 void processButtonPin() {
@@ -132,8 +88,12 @@ void processButtonPin() {
 void loop() {
   processButtonPin();
 
-  if (millis() - lastPatternStateSwitch > PATTERN_CYCLE_TIME / 2) {
+  /* each pattern consists of two or more states
+   * we switch between those states every PATTERN_STATE_DURATION ms
+   */
+  static unsigned long lastPatternStateSwitchTime = 0;
+  if (millis() - lastPatternStateSwitchTime > PATTERN_STATE_DURATION) {
     updatePattern();
-    lastPatternStateSwitch = millis();
+    lastPatternStateSwitchTime = millis();
   }
 }

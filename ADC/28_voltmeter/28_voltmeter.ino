@@ -16,7 +16,7 @@ void loop() {
   Serial.print(" volts: ");
   Serial.println(volts);
 
-  // updating the reference voltage to be more precise for smaller voltages
+  // updating the reference voltagresolutione to be more precise for smaller voltages
   if (volts < 1.1 && vRef != 1.1) {
     Serial.println("Updating analog reference to internal");
     analogReference(INTERNAL);
@@ -27,4 +27,5 @@ void loop() {
     analogReference(DEFAULT);
     vRef = 5;
   }
+  delay(500);
 }

@@ -41,4 +41,5 @@ void loop() {
     analogWrite(ledPins[i], PWM_RESOLUTION);
   }
   analogWrite(ledPins[led], dutyCycle);
+  delay(10);
 }

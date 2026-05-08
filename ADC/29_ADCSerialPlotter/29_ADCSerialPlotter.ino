@@ -12,9 +12,9 @@ void loop() {
   uint16_t potVal = analogRead(ADC_PIN);
   static uint16_t statVal = 500;
 
-  Serial.print("StatVal: ");
+  Serial.print("StaticValue:");
   Serial.print(statVal);
-  Serial.print(", PotValue: ");
+  Serial.print(",");
+  Serial.print("PotValue:");
   Serial.println(potVal);
-  delay(500);
 }

@@ -133,8 +133,6 @@ void resetGame() {
 }
 
 int getInput() {
-  while (!Serial.available()) {}
-
   char buffer[16] = { '\0' };
   int8_t bytesRead = Serial.readBytesUntil('\n', buffer, sizeof(buffer) - 1);
   buffer[bytesRead] = '\0';
@@ -157,22 +155,24 @@ void setup() {
 }
 
 void loop() {
-  int8_t numberGuessed = getInput();
-  if (numberGuessed == -1) {
-    Serial.println("Please provide a number in the following range: 0 - 100");
-    return;
-  }
+  if (Serial.available()) {
+    int8_t numberGuessed = getInput();
+    if (numberGuessed == -1) {
+      Serial.println("Please provide a number in the following range: 0 - 100");
+      return;
+    }
 
-  if (numberGuessed < currentGame.numberToGuess) {
-    Serial.println("Too low!");
-    currentGame.count++;
-  } else if (numberGuessed > currentGame.numberToGuess) {
-    Serial.println("Too high!");
-    currentGame.count++;
-  } else {
-    Serial.println("Correct. Congrats!");
-    leaderboard.add(currentGame.count);
-    leaderboard.print(currentGame.count);
-    resetGame();
+    if (numberGuessed < currentGame.numberToGuess) {
+      Serial.println("Too low!");
+      currentGame.count++;
+    } else if (numberGuessed > currentGame.numberToGuess) {
+      Serial.println("Too high!");
+      currentGame.count++;
+    } else {
+      Serial.println("Correct. Congrats!");
+      leaderboard.add(currentGame.count);
+      leaderboard.print(currentGame.count);
+      resetGame();
+    }
   }
 }

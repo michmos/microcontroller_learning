@@ -132,20 +132,6 @@ void resetGame() {
   Serial.println("Guess a number between 0 - 100");
 }
 
-int getInput() {
-  char buffer[16] = { '\0' };
-  int8_t bytesRead = Serial.readBytesUntil('\n', buffer, sizeof(buffer) - 1);
-  buffer[bytesRead] = '\0';
-
-  int8_t number = atoi(buffer);
-  if ((number == 0 && !(buffer[0] == '0' && bytesRead == 1))
-      || (number < 0 || number > 100)) {
-    return (-1);
-  }
-  return (number);
-}
-
-
 void setup() {
   Serial.begin(9600);
   Serial.println("Welcome to the number guessing game");
@@ -156,8 +142,8 @@ void setup() {
 
 void loop() {
   if (Serial.available()) {
-    int8_t numberGuessed = getInput();
-    if (numberGuessed == -1) {
+    int8_t numberGuessed = Serial.parseInt();
+    if (numberGuessed < 1 || numberGuessed > 100) {
       Serial.println("Please provide a number in the following range: 0 - 100");
       return;
     }
